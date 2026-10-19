@@ -1,0 +1,6 @@
+platform/targets-out/
+iso/
+kernal-roc.iso
+main.a
+kernel.elf
+.blueprint/
