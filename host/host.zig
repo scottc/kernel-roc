@@ -1,6 +1,7 @@
 // host/host.zig  (or a separate host/roc_runtime.zig that you @import)
 
 const std = @import("std");
+const roc_platform_abi = @import("roc_platform_abi.zig");
 const serial = @import("serial.zig");
 
 // ---------- required Roc runtime symbols ----------
@@ -11,12 +12,15 @@ var heap_offset: usize = 0;
 export fn roc_alloc(size: usize, alignment: u32) callconv(.c) ?[*]u8 {
     _ = alignment;
 
-    serial.write("roc_alloc\n");
+    //serial.write("roc_alloc\n");
 
     const aligned = std.mem.alignForward(usize, heap_offset, 16);
-    if (aligned + size > heap.len) return null;
-    const ptr = heap[aligned..].ptr; // ← many-item pointer
-    heap_offset = aligned + size;
+    const total = size + 16; // room for the refcount word Roc writes at ptr[-8]
+    if (aligned + total > heap.len) return null;
+    const base: [*]u8 = @ptrCast(heap[aligned..].ptr);
+    heap_offset = aligned + total;
+    const ptr = base + 8;
+    @memset(base[0..total], 0);
     return ptr;
 }
 
@@ -62,8 +66,9 @@ export fn roc_crashed(ptr: [*]const u8, len: usize) callconv(.c) void {
 
 // ---------- your effect ----------
 
-export fn roc_write_string(ptr: [*]const u8, len: usize) callconv(.c) void {
-    serial.write(ptr[0..len]);
+export fn roc_write_string(arg0: roc_platform_abi.RocStr) callconv(.c) void {
+    serial.write("[write_string] ");
+    serial.write(arg0.asSlice());
 }
 
 // ---------- entry that Roc will call ----------
@@ -88,7 +93,7 @@ export fn memcpy(noalias dest: [*]u8, noalias src: [*]const u8, n: usize) callco
 }
 
 export fn memset(dest: [*]u8, c: u8, n: usize) callconv(.c) [*]u8 {
-    serial.write("memset\n");
+    //serial.write("memset\n");
 
     @memset(dest[0..n], c);
     return dest;
@@ -132,6 +137,8 @@ const MultibootHeader = extern struct {
 };
 
 export const multiboot_header: MultibootHeader align(4) linksection(".multiboot") = .{};
+
+// extern var stack_top;
 
 // Simple entry that Multiboot will jump to
 export fn _start() callconv(.naked) noreturn {

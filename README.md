@@ -14,17 +14,23 @@ I hope this inspires you to make awesome roc platforms.
 nix run github:lukewilliamboswell/roc-blueprint/0.5.0 -- shell
 ```
 
+## gen glue
+```sh
+chmod +x scripts/gen_glue.sh
+./scripts/gen_glue.sh
+```
+
 ## Build zig host.a
 
 ```sh
 mkdir -p platform/targets-out/x64elf
 zig build-lib \
+  host/host.zig \
   -target x86_64-freestanding-none \
   -fno-entry \
   -OReleaseSafe \
   -mno-red-zone \
-  -femit-bin=platform/targets-out/x64elf/libhost.a \
-  host/host.zig
+  -femit-bin=platform/targets-out/x64elf/libhost.a
 ```
 
 ## Build roc platform main.a
@@ -44,7 +50,7 @@ zig build-exe \
   -target x86_64-freestanding-none \
   -mno-red-zone \
   -OReleaseSafe \
-  -femit-bin=kernel.elf \
+  -femit-bin=kernel.elf
 # output -> kernel.elf (ELF executable; typically the extension is omittied.)
 ```
 
@@ -69,13 +75,6 @@ qemu-system-x86_64 -cdrom kernal-roc.iso -display none -serial stdio
 ```
 ```
 Kernel Roc boot...
-roc_alloc
-Kernel Roc boot...
-roc_alloc
-Kernel Roc boot...
-roc_alloc
-Kernel Roc boot...
-roc_alloc
 ```
 
 > [!NOTE]
