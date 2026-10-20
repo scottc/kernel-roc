@@ -1,32 +1,28 @@
-ENTRY(_start)
+ENTRY(kmain)
 
-SECTIONS
-{
-    . = 1M;
+PHDRS {
+    text PT_LOAD FLAGS(5);
+    data PT_LOAD FLAGS(6);
+}
 
-    .multiboot : {
-        KEEP(*(.multiboot))
-    }
+SECTIONS {
+    . = 0xffffffff80000000;
 
-    .text : {
-        *(.text*)
-    }
+    .text : ALIGN(4K) {
+        *(.text .text.*)
+    } :text
 
-    .rodata : {
-        *(.rodata*)
-    }
+    .rodata : ALIGN(4K) {
+        *(.rodata .rodata.*)
+        KEEP(*(.limine_requests*))
+    } :text
 
-    .data : {
-        *(.data*)
-    }
+    .data : ALIGN(4K) {
+        *(.data .data.*)
+    } :data
 
-    .bss : {
-        *(.bss*)
+    .bss : ALIGN(4K) {
+        *(.bss .bss.*)
         *(COMMON)
-    }
-
-    . = ALIGN(16);
-    stack_bottom = .;
-    . = . + 64K;          /* 64 KiB stack */
-    stack_top = .;
+    } :data
 }

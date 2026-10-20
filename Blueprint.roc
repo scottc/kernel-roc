@@ -16,6 +16,7 @@ config = [
                 "zig",
 				"qemu",
 				"grub2",
+				"limine",
 				"xorriso"
 			]),
 	]),
@@ -28,6 +29,7 @@ config = [
 				"zig",
 				"qemu",
 				"grub2",
+				"limine",
 				"xorriso"
 			]),
 		],

@@ -6,3 +6,9 @@ kernel.elf
 .blueprint/
 .cache/glue/b17d287/
 host/roc_platform_abi.zig
+limine-binary.tar.gz
+limine-bios-cd.bin
+limine-uefi-cd.bin
+vendor/limine-binary/
+iso_root/boot/
+iso_root/
